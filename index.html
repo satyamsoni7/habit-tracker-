@@ -151,7 +151,7 @@
   .ht-loading { padding: 60px 20px; text-align: center; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
   .ht-banner { padding: 10px 14px; border-radius: 10px; background: #FDEDEA; border: 1px solid #F3C7BE; color: #9A2E1B; font-size: 12px; margin-bottom: 14px; }
 
-  /* ---------- In-page modal (confirm / prompt) ---------- */
+  /* ---------- In-page modal ---------- */
   .ht-modal-overlay {
     position: fixed; inset: 0; background: rgba(35,34,43,.4); backdrop-filter: blur(1px);
     display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px;
@@ -225,9 +225,8 @@
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   let state = { active: 'A', A: null, B: null };
-  let saveStatus = { A: 'saved', B: 'saved' }; // saved | saving | error
+  let saveStatus = { A: 'saved', B: 'saved' };
 
-  // ---------- In-page modal (replaces confirm()/prompt(), which sandboxed iframes block) ----------
   function showConfirm(message, okLabel){
     return new Promise(resolve => {
       const overlay = document.createElement('div');
@@ -274,20 +273,16 @@
     });
   }
 
-  // ---------- Data layer ----------
-  // Schema (v2): { name, month, habits:[{id,emoji,name}], checksByMonth: { "YYYY-MM": { habitId: [bool,...] } } }
-  // Every month's marks are kept permanently in checksByMonth — switching months never overwrites another month.
-
-  async function loadTracker(id){
+  // ---------- LocalStorage Layer ----------
+  function loadTracker(id){
     const def = DEFAULTS[id];
     try {
-      const res = await window.storage.get(def.key, true);
-      if (res && res.value) {
-        const parsed = JSON.parse(res.value);
+      const raw = localStorage.getItem(def.key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
         if (!parsed.name) parsed.name = def.defaultName;
         if (!parsed.month) parsed.month = todayMonth();
         if (!parsed.habits) parsed.habits = def.habits.map(h => ({ id: uid(), emoji: h[0], name: h[1] }));
-        // migrate old flat "checks" schema -> checksByMonth
         if (!parsed.checksByMonth) {
           parsed.checksByMonth = {};
           if (parsed.checks) parsed.checksByMonth[parsed.month] = parsed.checks;
@@ -303,11 +298,11 @@
     };
   }
 
-  async function saveTracker(id){
+  function saveTracker(id){
     saveStatus[id] = 'saving';
     updateSaveIndicator(id);
     try {
-      await window.storage.set(DEFAULTS[id].key, JSON.stringify(state[id]), true);
+      localStorage.setItem(DEFAULTS[id].key, JSON.stringify(state[id]));
       saveStatus[id] = 'saved';
     } catch(e) {
       console.error('save failed', e);
@@ -322,7 +317,7 @@
     if (!dot || !label) return;
     dot.classList.remove('saving','error');
     if (saveStatus[id] === 'saving') { dot.classList.add('saving'); label.textContent = 'saving…'; }
-    else if (saveStatus[id] === 'error') { dot.classList.add('error'); label.textContent = 'not saved — check connection, then tap a box to retry'; }
+    else if (saveStatus[id] === 'error') { dot.classList.add('error'); label.textContent = 'storage error'; }
     else { label.textContent = 'all marks saved · nothing is lost between days'; }
   }
 
@@ -440,7 +435,7 @@
     });
 
     root.querySelectorAll('.chk').forEach(el => {
-      el.addEventListener('click', async () => {
+      el.addEventListener('click', () => {
         const id = state.active;
         const t = state[id];
         const days = daysInMonth(t.month);
@@ -455,51 +450,60 @@
           const ring = root.querySelector(`[data-panel="${id}"] .ht-level-ring`);
           if (ring) setTimeout(() => ring.classList.remove('levelup'), 750);
         }
-        await saveTracker(id);
+        saveTracker(id);
       });
     });
 
     root.querySelectorAll('[data-month]').forEach(el => {
-      el.addEventListener('change', async () => {
+      el.addEventListener('change', () => {
         const id = el.dataset.month;
-        // switching months never touches other months' saved marks — each month is stored separately
         state[id].month = el.value;
         render();
-        await saveTracker(id);
+        saveTracker(id);
       });
     });
 
     root.querySelectorAll('[data-name]').forEach(el => {
-      el.addEventListener('change', async () => { const id = el.dataset.name; state[id].name = el.value || DEFAULTS[id].defaultName; render(); await saveTracker(id); });
+      el.addEventListener('change', () => {
+        const id = el.dataset.name;
+        state[id].name = el.value || DEFAULTS[id].defaultName;
+        render();
+        saveTracker(id);
+      });
     });
 
     root.querySelectorAll('.habit-input').forEach(el => {
-      el.addEventListener('change', async () => {
-        const id = state.active; const t = state[id];
+      el.addEventListener('change', () => {
+        const id = state.active;
+        const t = state[id];
         const h = t.habits.find(h => h.id === el.dataset.id);
         if (h) h.name = el.value || h.name;
-        await saveTracker(id);
+        saveTracker(id);
       });
     });
 
     root.querySelectorAll('[data-del]').forEach(el => {
       el.addEventListener('click', async () => {
-        const id = state.active; const t = state[id];
+        const id = state.active;
+        const t = state[id];
         const h = t.habits.find(h => h.id === el.dataset.del);
         const ok = await showConfirm(`Remove "${h ? h.name : 'this habit'}" from the list? Its past marks stay saved, it just won't show going forward.`, 'Remove');
         if (!ok) return;
         t.habits = t.habits.filter(h => h.id !== el.dataset.del);
-        render(); await saveTracker(id);
+        render();
+        saveTracker(id);
       });
     });
 
     root.querySelectorAll('[data-add]').forEach(el => {
       el.addEventListener('click', async () => {
-        const id = el.dataset.add; const t = state[id];
+        const id = el.dataset.add;
+        const t = state[id];
         const name = await showPrompt('Name the new habit', 'e.g. Stretch for 10 minutes');
         if (!name) return;
         t.habits.push({ id: uid(), emoji: '⭐', name });
-        render(); await saveTracker(id);
+        render();
+        saveTracker(id);
       });
     });
 
@@ -512,18 +516,20 @@
         const days = daysInMonth(t.month);
         const mc = getMonthChecks(t, t.month, days);
         t.habits.forEach(h => { mc[h.id] = new Array(days).fill(false); });
-        render(); await saveTracker(id);
+        render();
+        saveTracker(id);
       });
     });
   }
 
-  async function init(){
+  function init(){
     try {
-      state.A = await loadTracker('A');
-      state.B = await loadTracker('B');
+      state.A = loadTracker('A');
+      state.B = loadTracker('B');
       render();
     } catch(e) {
-      root.innerHTML = `<div class="ht-banner">Couldn't load saved data. Please refresh — your marks are safe in storage and will reappear.</div>`;
+      console.error(e);
+      root.innerHTML = `<div class="ht-banner">Couldn't load saved data. Please refresh.</div>`;
     }
   }
   init();
