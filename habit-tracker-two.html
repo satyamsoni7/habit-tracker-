@@ -1,0 +1,531 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+  .ht-root, .ht-root * { box-sizing: border-box; }
+
+  .ht-root {
+    --paper: #FBF8F2;
+    --ink: #23222B;
+    --ink-soft: #85818f;
+    --line: #E7E1D4;
+    --card: #ffffff;
+
+    --a-1: #EC9A2E; --a-2: #7CB342; --a-3: #2F9BD6; --a-4: #E85C4A;
+    --a-ink: #6b430a; --a-bg1: #FFF6E4; --a-bg2: #FFEFD6;
+
+    --b-1: #E8749A; --b-2: #9C86D6; --b-3: #55C1A6; --b-4: #F0AE5C;
+    --b-ink: #7a2f4d; --b-bg1: #FFF1F5; --b-bg2: #FBEBFB;
+
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 400px at 15% -10%, rgba(236,154,46,.07), transparent 60%),
+      radial-gradient(1200px 400px at 85% -10%, rgba(232,116,154,.07), transparent 60%),
+      var(--paper);
+    padding: 30px 22px 44px;
+    border-radius: 20px;
+    max-width: 1140px;
+    margin: 0 auto;
+    min-height: 100%;
+  }
+
+  /* ---------- Tabs ---------- */
+  .ht-tabs { display: flex; gap: 12px; margin-bottom: 26px; }
+  .ht-tab {
+    flex: 1; display: flex; align-items: center; gap: 13px;
+    padding: 13px 18px; border-radius: 16px; border: 2px solid var(--line);
+    background: var(--card); cursor: pointer; text-align: left;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .ht-tab:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(35,34,43,.06); }
+  .ht-tab.active.a { border-color: var(--a-1); background: linear-gradient(135deg, var(--a-bg1), var(--a-bg2)); box-shadow: 0 6px 20px rgba(236,154,46,.18); }
+  .ht-tab.active.b { border-color: var(--b-1); background: linear-gradient(135deg, var(--b-bg1), var(--b-bg2)); box-shadow: 0 6px 20px rgba(232,116,154,.18); }
+
+  .ht-tab-badge {
+    width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; color: #fff; flex-shrink: 0;
+  }
+  .a .ht-tab-badge { background: conic-gradient(from 210deg, var(--a-1), var(--a-2), var(--a-3), var(--a-1)); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+  .b .ht-tab-badge { background: conic-gradient(from 210deg, var(--b-1), var(--b-2), var(--b-3), var(--b-1)); border-radius: 50%; }
+
+  .ht-tab-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15.5px; line-height: 1.25; }
+  .ht-tab-sub { font-size: 11.5px; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; }
+
+  .ht-panel { display: none; animation: fadein .35s ease; }
+  .ht-panel.show { display: block; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- Hero header ---------- */
+  .ht-hero {
+    border-radius: 18px; padding: 22px 24px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;
+    position: relative; overflow: hidden;
+  }
+  .ht-panel.a .ht-hero { background: linear-gradient(120deg, var(--a-bg1), var(--a-bg2) 60%, #FFF9EE); border: 1.5px solid #F3DFAF; }
+  .ht-panel.b .ht-hero { background: linear-gradient(120deg, var(--b-bg1), var(--b-bg2) 60%, #FFF3F8); border: 1.5px solid #F3D3E2; }
+  .ht-hero::after {
+    content: ''; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 50%;
+    opacity: .12; pointer-events: none;
+  }
+  .ht-panel.a .ht-hero::after { background: radial-gradient(circle, var(--a-1), transparent 70%); }
+  .ht-panel.b .ht-hero::after { background: radial-gradient(circle, var(--b-1), transparent 70%); }
+
+  .ht-hero-left { position: relative; z-index: 1; }
+  .ht-title-wrap.a { color: var(--a-ink); }
+  .ht-title-wrap.b { color: var(--b-ink); }
+  .ht-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 25px; margin: 0 0 3px; display: flex; align-items: center; gap: 9px; }
+  .ht-panel.b .ht-title { font-family: 'Fraunces', serif; font-style: italic; font-weight: 600; font-size: 27px; }
+  .ht-name-input { font: inherit; border: none; background: transparent; border-bottom: 2px dotted currentColor; max-width: 170px; padding: 0 2px; color: inherit; }
+  .ht-name-input:focus { outline: none; }
+  .ht-tagline { font-size: 12.5px; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+
+  .ht-controls { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+  .ht-month { font: 600 13px 'Inter', sans-serif; border: 1.5px solid var(--line); border-radius: 9px; padding: 8px 10px; background: #fff; color: var(--ink); }
+
+  /* ---------- Level badge ---------- */
+  .ht-level { display: flex; align-items: center; gap: 12px; background: #fff; border: 1.5px solid var(--line); border-radius: 16px; padding: 9px 16px 9px 9px; box-shadow: 0 3px 10px rgba(35,34,43,.05); }
+  .ht-level-ring { width: 52px; height: 52px; border-radius: 50%; position: relative; flex-shrink: 0; transition: background 0.5s ease; }
+  .ht-level-ring::after { content: attr(data-lvl); position: absolute; inset: 6px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; }
+  .ht-level-ring.levelup { animation: ringpop .7s ease; }
+  @keyframes ringpop { 0% { transform: scale(1); } 35% { transform: scale(1.25) rotate(8deg); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
+  .ht-level-text { font-size: 11px; color: var(--ink-soft); line-height: 1.35; }
+  .ht-level-text b { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 14px; color: var(--ink); }
+  .ht-burst { position: absolute; font-size: 20px; pointer-events: none; opacity: 0; }
+  .ht-burst.go { animation: burst 1s ease forwards; }
+  @keyframes burst { 0% { opacity: 1; transform: translateY(0) scale(.6); } 100% { opacity: 0; transform: translateY(-38px) scale(1.3); } }
+
+  /* ---------- Save status ---------- */
+  .ht-save-status {
+    display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-soft); margin-bottom: 14px; margin-top: -14px;
+  }
+  .ht-save-dot { width: 7px; height: 7px; border-radius: 50%; background: #9ccB7c; flex-shrink: 0; transition: background .2s ease; }
+  .ht-save-dot.saving { background: #E8C158; animation: pulse 1s infinite; }
+  .ht-save-dot.error { background: #E85C4A; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+  /* ---------- Table ---------- */
+  .ht-scroll { overflow-x: auto; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card); box-shadow: 0 4px 16px rgba(35,34,43,.04); }
+  table.ht-table { border-collapse: collapse; width: 100%; min-width: 660px; }
+  .ht-table th, .ht-table td { text-align: center; padding: 0; }
+  .ht-table thead th { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-soft); padding: 10px 2px; border-bottom: 1.5px solid var(--line); position: sticky; top: 0; background: var(--card); z-index: 3; }
+  .ht-table thead th.weekend { color: var(--ink); font-weight: 700; }
+  .ht-table thead th.today { color: #fff; border-radius: 6px; }
+  .a .ht-table thead th.today { background: var(--a-1); }
+  .b .ht-table thead th.today { background: var(--b-1); }
+
+  .habit-col { text-align: left !important; min-width: 200px; position: sticky; left: 0; background: var(--card); z-index: 2; padding: 10px 14px !important; box-shadow: 3px 0 8px -4px rgba(35,34,43,.08); }
+  .total-col { min-width: 58px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-soft); font-weight: 600; }
+
+  tr.habit-row td { border-bottom: 1px solid var(--line); transition: background .15s ease; }
+  tr.habit-row:hover td { background: rgba(35,34,43,.02); }
+  tr.habit-row:last-child td { border-bottom: none; }
+  .habit-name-cell { display: flex; align-items: center; gap: 9px; }
+  .habit-emoji { font-size: 15.5px; }
+  .habit-input { font: 600 13.5px 'Inter', sans-serif; border: none; background: transparent; width: 100%; color: var(--ink); padding: 3px 0; }
+  .habit-input:focus { outline: none; border-bottom: 1.5px dotted var(--ink-soft); }
+  .habit-del { border: none; background: none; color: var(--ink-soft); cursor: pointer; opacity: 0; font-size: 13px; padding: 3px 4px; transition: opacity .15s; }
+  tr.habit-row:hover .habit-del { opacity: 1; }
+
+  .day-cell { padding: 7px 3px !important; }
+  .chk {
+    width: 25px; height: 25px; border-radius: 9px; border: 2px solid var(--chk-color, #ccc);
+    background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    transition: transform .15s cubic-bezier(.34,1.56,.64,1), background .18s ease, box-shadow .18s ease;
+    color: #fff; font-size: 13px; font-weight: 700; padding: 0;
+  }
+  .chk:hover { transform: scale(1.12); border-color: var(--chk-color, #999); }
+  .chk.on { background: var(--chk-color, #999); box-shadow: 0 2px 6px -1px var(--chk-color, #999); }
+  .chk.pop { animation: chkpop .32s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes chkpop { 0% { transform: scale(1); } 45% { transform: scale(1.35) rotate(-6deg); } 100% { transform: scale(1); } }
+
+  .add-row td { padding: 12px !important; }
+  .add-habit-btn { border: 1.5px dashed var(--line); background: transparent; border-radius: 10px; font: 600 12.5px 'Inter', sans-serif; color: var(--ink-soft); cursor: pointer; padding: 7px 14px; transition: all .15s; }
+  .ht-panel.a .add-habit-btn:hover { border-color: var(--a-1); color: var(--a-ink); background: var(--a-bg1); }
+  .ht-panel.b .add-habit-btn:hover { border-color: var(--b-1); color: var(--b-ink); background: var(--b-bg1); }
+
+  .ht-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 8px; }
+  .ht-quote { font-family: 'Fraunces', serif; font-style: italic; font-size: 13px; color: var(--ink-soft); }
+  .ht-reset { border: none; background: none; color: var(--ink-soft); font-size: 11.5px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+  .ht-loading { padding: 60px 20px; text-align: center; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .ht-banner { padding: 10px 14px; border-radius: 10px; background: #FDEDEA; border: 1px solid #F3C7BE; color: #9A2E1B; font-size: 12px; margin-bottom: 14px; }
+
+  /* ---------- In-page modal (confirm / prompt) ---------- */
+  .ht-modal-overlay {
+    position: fixed; inset: 0; background: rgba(35,34,43,.4); backdrop-filter: blur(1px);
+    display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+    animation: fadein .15s ease;
+  }
+  .ht-modal {
+    background: #fff; border-radius: 16px; padding: 22px; max-width: 340px; width: 100%;
+    box-shadow: 0 20px 50px rgba(35,34,43,.25);
+  }
+  .ht-modal-msg { font-size: 13.5px; line-height: 1.5; color: var(--ink); margin: 0 0 16px; }
+  .ht-modal-input {
+    width: 100%; font: 500 14px 'Inter', sans-serif; padding: 10px 12px; border-radius: 9px;
+    border: 1.5px solid var(--line); margin-bottom: 16px; color: var(--ink);
+  }
+  .ht-modal-input:focus { outline: none; border-color: #bbb; }
+  .ht-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .ht-modal-btn {
+    font: 600 12.5px 'Inter', sans-serif; padding: 9px 16px; border-radius: 9px; border: none; cursor: pointer;
+    transition: transform .12s ease;
+  }
+  .ht-modal-btn:hover { transform: translateY(-1px); }
+  .ht-modal-btn.cancel { background: var(--paper); color: var(--ink-soft); }
+  .ht-modal-btn.ok { background: var(--ink); color: #fff; }
+
+  @media (max-width: 640px) {
+    .ht-hero { flex-direction: column; align-items: flex-start; }
+    .ht-tab-sub { display: none; }
+  }
+</style>
+
+<div class="ht-root" id="htRoot">
+  <div class="ht-loading" id="htLoading">loading trackers…</div>
+</div>
+
+<script>
+(function(){
+  const root = document.getElementById('htRoot');
+
+  const DEFAULTS = {
+    A: {
+      key: 'trackerA', persona: 'a', defaultName: 'Future Engineer', tagline: 'Daily Level Up',
+      icon: '⚡', colors: ['a-1','a-2','a-3','a-4'],
+      quote: 'small daily improvements over time lead to stunning results',
+      habits: [
+        ['🌅','Wake up early'], ['💧','Drink 2L water'], ['🏋️','Workout / Exercise'],
+        ['📚','Study / DSA'], ['💻','Coding practice'], ['📖','Read 20 minutes'],
+        ['🚫','No junk food'], ['📵','No unnecessary scrolling'], ['🧘','Meditation'],
+        ['😴','Sleep on time'], ['✨','Personal hygiene'], ['📝','Journal'],
+        ['🎨','Practice a skill'], ['🧹','Keep room clean'], ['📓','Daily revision']
+      ]
+    },
+    B: {
+      key: 'trackerB', persona: 'b', defaultName: 'Future Doctor', tagline: 'One day at a time',
+      icon: '🌸', colors: ['b-1','b-2','b-3','b-4'],
+      quote: 'you are going to be an amazing doctor ✨',
+      habits: [
+        ['💊','Medicine'], ['📖','Read'], ['🏋️','Workout'], ['🛁','Self-care'],
+        ['😴','Sleep 7–8 hours'], ['💧','Drink enough water'], ['📓','Study'],
+        ['🚫','Avoid junk food'], ['🍎','Eat healthy'], ['😊','Something that makes me happy'],
+        ['🌈','Stay positive'], ['📵','Less screen time'], ['📝','Journal / gratitude'],
+        ['💗','Be kind to myself']
+      ]
+    }
+  };
+
+  function todayMonth(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+  function todayDay(){ return new Date().getDate(); }
+  function daysInMonth(ym){ const [y,m] = ym.split('-').map(Number); return new Date(y, m, 0).getDate(); }
+  function isWeekend(ym, day){ const [y,m] = ym.split('-').map(Number); const d = new Date(y, m-1, day); return d.getDay() === 0 || d.getDay() === 6; }
+  function uid(){ return 'h' + Math.random().toString(36).slice(2,9); }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  let state = { active: 'A', A: null, B: null };
+  let saveStatus = { A: 'saved', B: 'saved' }; // saved | saving | error
+
+  // ---------- In-page modal (replaces confirm()/prompt(), which sandboxed iframes block) ----------
+  function showConfirm(message, okLabel){
+    return new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.className = 'ht-modal-overlay';
+      overlay.innerHTML = `<div class="ht-modal">
+        <p class="ht-modal-msg">${escapeHtml(message)}</p>
+        <div class="ht-modal-actions">
+          <button class="ht-modal-btn cancel" type="button">Cancel</button>
+          <button class="ht-modal-btn ok" type="button">${escapeHtml(okLabel || 'Confirm')}</button>
+        </div>
+      </div>`;
+      root.appendChild(overlay);
+      const cleanup = (result) => { overlay.remove(); resolve(result); };
+      overlay.querySelector('.cancel').addEventListener('click', () => cleanup(false));
+      overlay.querySelector('.ok').addEventListener('click', () => cleanup(true));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+      document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape'){ cleanup(false); document.removeEventListener('keydown', esc); } });
+    });
+  }
+
+  function showPrompt(message, placeholder){
+    return new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.className = 'ht-modal-overlay';
+      overlay.innerHTML = `<div class="ht-modal">
+        <p class="ht-modal-msg">${escapeHtml(message)}</p>
+        <input class="ht-modal-input" type="text" placeholder="${escapeHtml(placeholder || '')}" />
+        <div class="ht-modal-actions">
+          <button class="ht-modal-btn cancel" type="button">Cancel</button>
+          <button class="ht-modal-btn ok" type="button">Add</button>
+        </div>
+      </div>`;
+      root.appendChild(overlay);
+      const input = overlay.querySelector('.ht-modal-input');
+      setTimeout(() => input.focus(), 30);
+      const cleanup = (result) => { overlay.remove(); resolve(result); };
+      overlay.querySelector('.cancel').addEventListener('click', () => cleanup(null));
+      overlay.querySelector('.ok').addEventListener('click', () => cleanup(input.value.trim() || null));
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') cleanup(input.value.trim() || null);
+        if (e.key === 'Escape') cleanup(null);
+      });
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(null); });
+    });
+  }
+
+  // ---------- Data layer ----------
+  // Schema (v2): { name, month, habits:[{id,emoji,name}], checksByMonth: { "YYYY-MM": { habitId: [bool,...] } } }
+  // Every month's marks are kept permanently in checksByMonth — switching months never overwrites another month.
+
+  async function loadTracker(id){
+    const def = DEFAULTS[id];
+    try {
+      const res = await window.storage.get(def.key, true);
+      if (res && res.value) {
+        const parsed = JSON.parse(res.value);
+        if (!parsed.name) parsed.name = def.defaultName;
+        if (!parsed.month) parsed.month = todayMonth();
+        if (!parsed.habits) parsed.habits = def.habits.map(h => ({ id: uid(), emoji: h[0], name: h[1] }));
+        // migrate old flat "checks" schema -> checksByMonth
+        if (!parsed.checksByMonth) {
+          parsed.checksByMonth = {};
+          if (parsed.checks) parsed.checksByMonth[parsed.month] = parsed.checks;
+        }
+        delete parsed.checks;
+        return parsed;
+      }
+    } catch(e) { console.error('load failed', e); }
+    return {
+      name: def.defaultName, month: todayMonth(),
+      habits: def.habits.map(h => ({ id: uid(), emoji: h[0], name: h[1] })),
+      checksByMonth: {}
+    };
+  }
+
+  async function saveTracker(id){
+    saveStatus[id] = 'saving';
+    updateSaveIndicator(id);
+    try {
+      await window.storage.set(DEFAULTS[id].key, JSON.stringify(state[id]), true);
+      saveStatus[id] = 'saved';
+    } catch(e) {
+      console.error('save failed', e);
+      saveStatus[id] = 'error';
+    }
+    updateSaveIndicator(id);
+  }
+
+  function updateSaveIndicator(id){
+    const dot = root.querySelector(`[data-panel="${id}"] .ht-save-dot`);
+    const label = root.querySelector(`[data-panel="${id}"] .ht-save-label`);
+    if (!dot || !label) return;
+    dot.classList.remove('saving','error');
+    if (saveStatus[id] === 'saving') { dot.classList.add('saving'); label.textContent = 'saving…'; }
+    else if (saveStatus[id] === 'error') { dot.classList.add('error'); label.textContent = 'not saved — check connection, then tap a box to retry'; }
+    else { label.textContent = 'all marks saved · nothing is lost between days'; }
+  }
+
+  function getMonthChecks(t, month, days){
+    if (!t.checksByMonth[month]) t.checksByMonth[month] = {};
+    const mc = t.checksByMonth[month];
+    t.habits.forEach(h => {
+      if (!mc[h.id]) mc[h.id] = [];
+      while (mc[h.id].length < days) mc[h.id].push(false);
+      if (mc[h.id].length > days) mc[h.id].length = days;
+    });
+    return mc;
+  }
+
+  function computeLevel(mc, habits, days){
+    let total = 0, possible = habits.length * days;
+    habits.forEach(h => { total += (mc[h.id]||[]).filter(Boolean).length; });
+    const pct = possible ? Math.round((total/possible)*100) : 0;
+    const level = Math.floor(pct/10) + 1;
+    return { total, possible, pct, level };
+  }
+
+  function render(justToggled){
+    root.innerHTML = `
+      <div class="ht-tabs">${tabHtml('A', state.A, 'a')}${tabHtml('B', state.B, 'b')}</div>
+      ${panelHtml('A', state.A, 'a', justToggled === 'A')}
+      ${panelHtml('B', state.B, 'b', justToggled === 'B')}
+    `;
+    attachEvents();
+    updateSaveIndicator('A');
+    updateSaveIndicator('B');
+  }
+
+  function tabHtml(id, t, persona){
+    const active = state.active === id ? 'active ' : '';
+    return `<div class="ht-tab ${active}${persona}" data-tab="${id}">
+      <div class="ht-tab-badge">${DEFAULTS[id].icon}</div>
+      <div>
+        <div class="ht-tab-name">${escapeHtml(t.name)}</div>
+        <div class="ht-tab-sub">${DEFAULTS[id].tagline}</div>
+      </div>
+    </div>`;
+  }
+
+  function panelHtml(id, t, persona, leveledUp){
+    const days = daysInMonth(t.month);
+    const mc = getMonthChecks(t, t.month, days);
+    const lvl = computeLevel(mc, t.habits, days);
+    const colors = DEFAULTS[id].colors;
+    const ringColor = `var(--${persona}-1)`;
+    const isCurrentMonth = t.month === todayMonth();
+    const tDay = todayDay();
+
+    let head = `<th class="habit-col">Habit</th>`;
+    for (let d=1; d<=days; d++){
+      const cls = [isWeekend(t.month,d) ? 'weekend' : '', (isCurrentMonth && d === tDay) ? 'today' : ''].filter(Boolean).join(' ');
+      head += `<th class="${cls}">${d}</th>`;
+    }
+    head += `<th class="total-col">Total</th>`;
+
+    let rows = '';
+    t.habits.forEach((h, i) => {
+      const color = `var(--${colors[i % colors.length]})`;
+      const arr = mc[h.id];
+      const n = arr.filter(Boolean).length;
+      let cells = `<td class="habit-col"><div class="habit-name-cell">
+          <span class="habit-emoji">${h.emoji}</span>
+          <input class="habit-input" data-id="${h.id}" data-field="name" value="${escapeHtml(h.name)}" />
+          <button class="habit-del" data-del="${h.id}" title="Remove habit">✕</button>
+        </div></td>`;
+      for (let d=0; d<days; d++){
+        cells += `<td class="day-cell"><button class="chk ${arr[d]?'on':''}" style="--chk-color:${color}" data-hid="${h.id}" data-day="${d}">${arr[d] ? '✓' : ''}</button></td>`;
+      }
+      cells += `<td class="total-col">${n}/${days}</td>`;
+      rows += `<tr class="habit-row">${cells}</tr>`;
+    });
+
+    return `<div class="ht-panel ${persona} ${state.active===id?'show':''}" data-panel="${id}">
+      <div class="ht-hero">
+        <div class="ht-hero-left ht-title-wrap ${persona}">
+          <div class="ht-title">${DEFAULTS[id].icon}
+            <input class="ht-name-input" data-name="${id}" value="${escapeHtml(t.name)}" />
+            <span style="font-size:14px;font-weight:500;opacity:.7;">'s tracker</span>
+          </div>
+          <div class="ht-tagline">${DEFAULTS[id].tagline}</div>
+        </div>
+        <div class="ht-controls">
+          <input type="month" class="ht-month" data-month="${id}" value="${t.month}" />
+          <div class="ht-level" style="position:relative;">
+            <div class="ht-level-ring ${leveledUp?'levelup':''}" data-lvl="${lvl.level}" style="background:conic-gradient(${ringColor} ${lvl.pct*3.6}deg, var(--line) 0deg)"></div>
+            ${leveledUp ? `<span class="ht-burst go" style="top:-6px;left:2px;">✨</span>` : ''}
+            <div class="ht-level-text"><b>${lvl.total}/${lvl.possible}</b>${lvl.pct}% this month</div>
+          </div>
+        </div>
+      </div>
+      <div class="ht-save-status"><span class="ht-save-dot"></span><span class="ht-save-label">all marks saved · nothing is lost between days</span></div>
+      <div class="ht-scroll">
+        <table class="ht-table">
+          <thead><tr>${head}</tr></thead>
+          <tbody>${rows}
+            <tr class="add-row"><td colspan="${days+2}"><button class="add-habit-btn" data-add="${id}">+ Add habit</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ht-footer">
+        <span class="ht-quote">${DEFAULTS[id].quote}</span>
+        <button class="ht-reset" data-reset="${id}">reset this month</button>
+      </div>
+    </div>`;
+  }
+
+  function attachEvents(){
+    root.querySelectorAll('[data-tab]').forEach(el => {
+      el.addEventListener('click', () => { state.active = el.dataset.tab; render(); });
+    });
+
+    root.querySelectorAll('.chk').forEach(el => {
+      el.addEventListener('click', async () => {
+        const id = state.active;
+        const t = state[id];
+        const days = daysInMonth(t.month);
+        const mc = getMonthChecks(t, t.month, days);
+        const before = computeLevel(mc, t.habits, days).level;
+        const hid = el.dataset.hid, day = Number(el.dataset.day);
+        mc[hid][day] = !mc[hid][day];
+        const after = computeLevel(mc, t.habits, days).level;
+        const leveledUp = after > before && mc[hid][day];
+        render(leveledUp ? id : null);
+        if (leveledUp) {
+          const ring = root.querySelector(`[data-panel="${id}"] .ht-level-ring`);
+          if (ring) setTimeout(() => ring.classList.remove('levelup'), 750);
+        }
+        await saveTracker(id);
+      });
+    });
+
+    root.querySelectorAll('[data-month]').forEach(el => {
+      el.addEventListener('change', async () => {
+        const id = el.dataset.month;
+        // switching months never touches other months' saved marks — each month is stored separately
+        state[id].month = el.value;
+        render();
+        await saveTracker(id);
+      });
+    });
+
+    root.querySelectorAll('[data-name]').forEach(el => {
+      el.addEventListener('change', async () => { const id = el.dataset.name; state[id].name = el.value || DEFAULTS[id].defaultName; render(); await saveTracker(id); });
+    });
+
+    root.querySelectorAll('.habit-input').forEach(el => {
+      el.addEventListener('change', async () => {
+        const id = state.active; const t = state[id];
+        const h = t.habits.find(h => h.id === el.dataset.id);
+        if (h) h.name = el.value || h.name;
+        await saveTracker(id);
+      });
+    });
+
+    root.querySelectorAll('[data-del]').forEach(el => {
+      el.addEventListener('click', async () => {
+        const id = state.active; const t = state[id];
+        const h = t.habits.find(h => h.id === el.dataset.del);
+        const ok = await showConfirm(`Remove "${h ? h.name : 'this habit'}" from the list? Its past marks stay saved, it just won't show going forward.`, 'Remove');
+        if (!ok) return;
+        t.habits = t.habits.filter(h => h.id !== el.dataset.del);
+        render(); await saveTracker(id);
+      });
+    });
+
+    root.querySelectorAll('[data-add]').forEach(el => {
+      el.addEventListener('click', async () => {
+        const id = el.dataset.add; const t = state[id];
+        const name = await showPrompt('Name the new habit', 'e.g. Stretch for 10 minutes');
+        if (!name) return;
+        t.habits.push({ id: uid(), emoji: '⭐', name });
+        render(); await saveTracker(id);
+      });
+    });
+
+    root.querySelectorAll('[data-reset]').forEach(el => {
+      el.addEventListener('click', async () => {
+        const id = el.dataset.reset;
+        const t = state[id];
+        const ok = await showConfirm(`Reset all checkmarks for ${t.month}? Other months are never affected, but this month cannot be undone.`, 'Reset month');
+        if (!ok) return;
+        const days = daysInMonth(t.month);
+        const mc = getMonthChecks(t, t.month, days);
+        t.habits.forEach(h => { mc[h.id] = new Array(days).fill(false); });
+        render(); await saveTracker(id);
+      });
+    });
+  }
+
+  async function init(){
+    try {
+      state.A = await loadTracker('A');
+      state.B = await loadTracker('B');
+      render();
+    } catch(e) {
+      root.innerHTML = `<div class="ht-banner">Couldn't load saved data. Please refresh — your marks are safe in storage and will reappear.</div>`;
+    }
+  }
+  init();
+})();
+</script>
